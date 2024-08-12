@@ -23,7 +23,7 @@ def rearrange_and_rotate_pdf(input_pdf_stream):
     for i, page_num in enumerate(page_order):
         page = reader.pages[page_num - 1]
         # 3または4の倍数ページを回転させる
-        if (i + 1) % 3 == 0 or (i + 1) % 4 == 0:
+        if (i + 1) % 3 == 0 and (i + 1) % 4 == 0:
             page.rotate(180)
         writer.add_page(page)
 
