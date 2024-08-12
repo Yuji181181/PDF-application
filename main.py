@@ -40,7 +40,7 @@ def rearrange_and_rotate_pdf(input_pdf_stream):
     return output_stream
 
 # Streamlitアプリケーション
-st.title("家庭用プリンターPDF冊子作成アプリ")
+st.title("同人誌PDFクリエイター")
 
 # PDFファイルをアップロード
 uploaded_file = st.file_uploader("PDFファイルをアップロードしてください", type="pdf")
@@ -59,4 +59,4 @@ if uploaded_file is not None:
     except Exception as e:
         st.error(f"エラーが発生しました: {e}")
 
-st.write("test")
+st.write("家庭用プリンターでは冊子の形を作れません。しかし、PDFの順番を入れ替えてページを回転させ、２in１で印刷すれば家庭用プリンターでも冊子を作ることができます。このアプリでPDFを編集し２in１で印刷すれば、簡単に同人冊子を作ることができます。")
