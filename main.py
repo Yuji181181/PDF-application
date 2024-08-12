@@ -4,19 +4,20 @@ import streamlit as st
 
 def generate_page_order(n):
     order = []
-    for i in range(1, n // 2 + 1):
-        order.append(i)
-        order.append(n - i + 1)
+    for i in range(n // 2):
+        order.append(n - i)      # 後半のページ
+        order.append(i + 1)      # 前半のページ
     return order
 
 def rearrange_and_rotate_pdf(input_pdf_stream):
     reader = PdfReader(input_pdf_stream)
-    writer = PdfWriter()
+    writer = PdfWriter("同人誌PDFクリエイター")
 
     num_pages = len(reader.pages)
     if num_pages % 4 != 0:
         raise ValueError("ページ数は4の倍数である必要があります。")
 
+    # ページ順の生成
     page_order = generate_page_order(num_pages)
 
     # 回転が必要なページを計算
@@ -40,7 +41,7 @@ def rearrange_and_rotate_pdf(input_pdf_stream):
     return output_stream
 
 # Streamlitアプリケーション
-st.title("同人誌PDFクリエイター")
+st.title()
 
 # PDFファイルをアップロード
 uploaded_file = st.file_uploader("PDFファイルをアップロードしてください", type="pdf")
@@ -60,3 +61,4 @@ if uploaded_file is not None:
         st.error(f"エラーが発生しました: {e}")
 
 st.write("家庭用プリンターでは冊子の形を作れません。しかし、PDFの順番を入れ替えてページを回転させ、２in１で印刷すれば家庭用プリンターでも冊子を作ることができます。このアプリでPDFを編集し２in１で印刷すれば、簡単に同人冊子を作ることができます。")
+
