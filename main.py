@@ -11,7 +11,7 @@ def generate_page_order(n):
 
 def rearrange_and_rotate_pdf(input_pdf_stream):
     reader = PdfReader(input_pdf_stream)
-    writer = PdfWriter("同人誌PDFクリエイター")
+    writer = PdfWriter()
 
     num_pages = len(reader.pages)
     if num_pages % 4 != 0:
@@ -41,7 +41,7 @@ def rearrange_and_rotate_pdf(input_pdf_stream):
     return output_stream
 
 # Streamlitアプリケーション
-st.title()
+st.title("同人誌PDFクリエイター")
 
 # PDFファイルをアップロード
 uploaded_file = st.file_uploader("PDFファイルをアップロードしてください", type="pdf")
