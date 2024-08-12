@@ -40,7 +40,7 @@ def rearrange_and_rotate_pdf(input_pdf_stream):
     return output_stream
 
 # Streamlitアプリケーション
-st.title("PDF 順番入れ替え＆回転アプリ")
+st.title("家庭用プリンターPDF冊子作成アプリ")
 
 # PDFファイルをアップロード
 uploaded_file = st.file_uploader("PDFファイルをアップロードしてください", type="pdf")
