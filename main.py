@@ -46,34 +46,19 @@ st.title("同人誌PDFクリエイター")
 # PDFファイルをアップロード
 uploaded_file = st.file_uploader("PDFファイルをアップロードしてください", type="pdf", accept_multiple_files=True)
 
-if uploaded_files:
-    pdf_buffers = []
-    zip_buffer = io.BytesIO()
-
-    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
-        for uploaded_file in uploaded_files:
-            try:
-                # PDFの処理
-                output_pdf_stream = rearrange_and_rotate_pdf(uploaded_file)
-
-                # PDFの個別ダウンロードボタンを表示
-                st.download_button(
-                    label=f"ダウンロード {uploaded_file.name}",
-                    data=output_pdf_stream,
-                    file_name=f"rearranged_rotated_{uploaded_file.name}",
-                    mime="application/pdf"
-                )
-
-                # ZIPに追加
-                pdf_buffers.append((f"rearranged_rotated_{uploaded_file.name}", output_pdf_stream.getvalue()))
-            except Exception as e:
-                st.error(f"ファイル {uploaded_file.name} の処理中にエラーが発生しました: {e}")
-
-    # すべてのPDFをZIPに追加
-    for file_name, pdf_data in pdf_buffers:
-        zip_file.writestr(file_name, pdf_data)
-
-    zip_buffer.seek(0)
+if uploaded_file is not None:
+    try:
+        if st.button("処理開始"):
+            output_pdf_stream = rearrange_and_rotate_pdf(uploaded_file)
+            st.write("PDFの操作が完了しました。以下に表示します。")
+            st.download_button(
+                label="ダウンロード PDF",
+                data=output_pdf_stream,
+                file_name="rearranged_rotated.pdf",
+                mime="application/pdf"
+            )
+    except Exception as e:
+        st.error(f"エラーが発生しました: {e}")
 
 st.write("家庭用プリンターでは冊子の形を作れません。しかし、このアプリでPDFを編集し２in１で印刷すれば家庭用プリンターでも冊子を作ることができます。")
 
