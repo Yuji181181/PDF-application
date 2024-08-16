@@ -44,7 +44,7 @@ def rearrange_and_rotate_pdf(input_pdf_stream):
 st.title("同人誌PDFクリエイター")
 
 # PDFファイルをアップロード
-uploaded_file = st.file_uploader("PDFファイルをアップロードしてください", type="pdf")
+uploaded_file = st.file_uploader("PDFファイルをアップロードしてください", type="pdf", accept_multiple_files=True)
 
 if uploaded_file is not None:
     try:
