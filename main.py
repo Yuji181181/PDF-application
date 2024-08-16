@@ -75,13 +75,5 @@ if uploaded_files:
 
     zip_buffer.seek(0)
 
-    # ZIPファイルをダウンロードするボタンを表示
-    st.download_button(
-        label="すべてをZIPとしてダウンロード",
-        data=zip_buffer,
-        file_name="rearranged_pdfs.zip",
-        mime="application/zip"
-    )
-
 st.write("家庭用プリンターでは冊子の形を作れません。しかし、このアプリでPDFを編集し２in１で印刷すれば家庭用プリンターでも冊子を作ることができます。")
 
