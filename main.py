@@ -1,76 +1,81 @@
-from pypdf import PdfReader, PdfWriter
-import io
 import streamlit as st
+from pypdf import PdfReader, PdfWriter
+import tempfile
 import zipfile
+import os
 
 def generate_page_order(n):
     order = []
-    for i in range(n // 2):
-        order.append(n - i)  # 後半のページ
-        order.append(i + 1)  # 前半のページ
+    for i in range(1, n // 2 + 1):
+        order.append(i)
+        order.append(n - i + 1)
     return order
 
-def rearrange_and_rotate_pdf(input_pdf_stream):
-    reader = PdfReader(input_pdf_stream)
+def rearrange_and_rotate_pdf(input_pdf, output_pdf_path):
+    # PDFファイルを読み込む
+    reader = PdfReader(input_pdf)
     writer = PdfWriter()
 
+    # ページ数が4の倍数か確認
     num_pages = len(reader.pages)
-    if num_pages % 4 != 0:
+    if num_pages < 4 or num_pages % 4 != 0:
         raise ValueError("ページ数は4の倍数である必要があります。")
 
+    # 指定のパターンでページの順番を生成
     page_order = generate_page_order(num_pages)
 
-    pages_to_rotate = []
-    for i in range(num_pages):
-        if (i + 1) % 4 == 3 or (i + 1) % 4 == 0:
-            pages_to_rotate.append(page_order[i])
-
-    for page_num in page_order:
+    # 新しい順番でページを追加し、3と4の倍数ページを回転させる
+    for i, page_num in enumerate(page_order):
         page = reader.pages[page_num - 1]
-        if page_num in pages_to_rotate:
+
+        # 新しい順番における3の倍数または4の倍数のページを回転させる
+        if (i + 1) % 3 == 0 or (i + 1) % 4 == 0:
             page.rotate(180)
 
         writer.add_page(page)
 
-    output_stream = io.BytesIO()
-    writer.write(output_stream)
-    output_stream.seek(0)
-    return output_stream
+    # 出力ファイルとして保存
+    with open(output_pdf_path, "wb") as output_pdf_file:
+        writer.write(output_pdf_file)
 
-def process_multiple_pdfs(uploaded_files):
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
+st.title("PDF 編集アプリ")
+
+uploaded_files = st.file_uploader("PDFファイルをアップロードしてください", type="pdf", accept_multiple_files=True)
+if uploaded_files:
+    option = st.radio("ダウンロード方法を選択してください", ('個別でダウンロード', 'Zipで一括ダウンロード'))
+
+    # 一時ディレクトリを用意
+    with tempfile.TemporaryDirectory() as tmpdir:
+        output_files = []
         for uploaded_file in uploaded_files:
-            try:
-                output_pdf_stream = rearrange_and_rotate_pdf(uploaded_file)
-                zip_file.writestr(uploaded_file.name, output_pdf_stream.read())
-            except ValueError as ve:
-                st.error(f"{uploaded_file.name} でエラーが発生しました: {ve}")
-            except Exception as e:
-                st.error(f"{uploaded_file.name} でエラーが発生しました: {e}")
-    
-    zip_buffer.seek(0)
-    return zip_buffer
+            input_pdf_path = os.path.join(tmpdir, uploaded_file.name)
+            with open(input_pdf_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
 
-# Streamlitアプリケーション
-st.title("同人誌PDFクリエイター")
+            output_pdf_path = os.path.join(tmpdir, f"edited_{uploaded_file.name}")
+            rearrange_and_rotate_pdf(input_pdf_path, output_pdf_path)
+            output_files.append(output_pdf_path)
 
-# 複数PDFファイルをアップロード
-uploaded_files = st.file_uploader(
-    "PDFファイルをアップロードしてください", type="pdf", accept_multiple_files=True)
+        if option == '個別でダウンロード':
+            for output_file in output_files:
+                with open(output_file, "rb") as f:
+                    st.download_button(
+                        label=f"{os.path.basename(output_file)} をダウンロード",
+                        data=f,
+                        file_name=os.path.basename(output_file)
+                    )
 
-if uploaded_files is not None and len(uploaded_files) > 0:
-    if st.button("処理開始"):
-        try:
-            zip_buffer = process_multiple_pdfs(uploaded_files)
-            st.success("PDFの操作が完了しました。以下に表示します。")
-            st.download_button(
-                label="ダウンロード ZIP",
-                data=zip_buffer,
-                file_name="rearranged_rotated_pdfs.zip",
-                mime="application/zip"
-            )
-        except Exception as e:
-            st.error(f"一括処理中にエラーが発生しました: {e}")
+        elif option == 'Zipで一括ダウンロード':
+            zip_output_path = os.path.join(tmpdir, "edited_pdfs.zip")
+            with zipfile.ZipFile(zip_output_path, 'w') as zipf:
+                for output_file in output_files:
+                    zipf.write(output_file, arcname=os.path.basename(output_file))
+
+            with open(zip_output_path, "rb") as f:
+                st.download_button(
+                    label="すべての編集されたPDFをZipでダウンロード",
+                    data=f,
+                    file_name="edited_pdfs.zip"
+                )
 
 st.write("家庭用プリンターでは冊子の形を作れません。しかし、このアプリでPDFを編集し２in１で印刷すれば家庭用プリンターでも冊子を作ることができます。")
