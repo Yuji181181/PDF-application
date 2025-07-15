@@ -1,4 +1,4 @@
-家庭用プリンターで冊子の印刷をできるようにするPDFのアプリケーション
+家庭用プリンターで冊子の印刷をできるようにPDFを編集するアプリケーション
 
 サイト
 https://pdf-application-zfjvuarvmqbmqtvy35t6dq.streamlit.app/
